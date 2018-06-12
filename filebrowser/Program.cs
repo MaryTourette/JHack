@@ -16,7 +16,13 @@ namespace filebrowser
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+#if DEBUG
+            //Application.Run(new Form1());
+            Application.Run(new Login());
+#else
+            Application.Run(new Login());
+#endif
+
         }
     }
 }
