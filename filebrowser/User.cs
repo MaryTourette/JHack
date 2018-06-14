@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/**
+ * 
+ * This class store user details including the JASON Web Token
+ * 
+ **/
 
 namespace filebrowser
 {
+    //Class of users with details and jwt token
     class User
     {
-        public int Id { get; set; }
         public string Username { get; set; }
         public string eMail { get; set; }
         public string access_token { get; set; }

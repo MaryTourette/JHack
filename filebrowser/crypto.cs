@@ -1,7 +1,44 @@
-﻿using System;
+﻿/**
+ * 
+ * The class crypto provide the main crypto functionality for the asymetric en- and decryption 
+ * 
+ * Keys() generate a new rsa keypair 
+         * @param string publicKeyFileName
+         * @param string privateKeyFileName
+ *
+ * Encrypt() encrypt a rsa file with the public key and store the new file to the given path
+         * @param string publicKeyFileName
+         * @param string plainFileName
+         * @param string encryptedFileName
+* 
+ * Decrypt() decrypt a rsa file with the private key and store the new file to the given path
+         * @param string privateKeyFileName
+         * @param string encryptedFileName
+         * @param string plainFileName
+* 
+ * The class_symetric crypto provide the main symetric crypto functionality for the en- and decryption 
+ *
+ * symetrEncrypt() encrypt a aes file with the public key and store the new file to the given path
+ * The Key and the IV will be also stored in a file 
+         * @param string fileInputPath
+         * @param string fileOutputPath
+         * @param string fileOutputKeyPath
+         * @param string fileOutputIVPath
+* 
+ * symetrDecrypt() decrypt a aes file with the private key and store the new file to the given path
+         * @param string fileInputPath
+         * @param string fileOutputPath
+* 
+ * getKey() get the aes key from a file 
+         * @param string fileInputKeyPath
+ *
+ * getIV() get the aes IV from a file
+         * @param string fileInputIVPath
+ **/
+
+using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Collections.Generic;
 using System.Text;
 
 
@@ -9,7 +46,7 @@ namespace filebrowser
 {
     class crypto
     {
-        // Generate a new key pair
+        // Generate a new rsa keypair
         public static void Keys(string publicKeyFileName, string privateKeyFileName)
 
         {
@@ -67,17 +104,15 @@ namespace filebrowser
 
                 privateKeyFile.Write(privateKey);
 
+                //ToDo Logging
+
             }
 
             catch (Exception ex)
 
             {
-
+                //ToDo Logging
                 // Any errors? Show them
-
-                Console.WriteLine("Exception generating a new key pair! More info:");
-
-                Console.WriteLine(ex.Message);
 
             }
 
@@ -108,7 +143,7 @@ namespace filebrowser
 
         }
 
-        // Encrypt a file
+        // Encrypt a rsa file
         public static void Encrypt(string publicKeyFileName, string plainFileName, string encryptedFileName)
 
         {
@@ -180,16 +215,14 @@ namespace filebrowser
 
                 encryptedFile.Write(encryptedBytes, 0, encryptedBytes.Length);
 
+                //ToDo Logging 
             }
 
             catch (Exception ex)
 
             {
-
+                //ToDo Logging
                 // Any errors? Show them
-
-                Console.WriteLine("Exception encrypting file! More info:");
-
                 Console.WriteLine(ex.Message);
 
             }
@@ -229,7 +262,7 @@ namespace filebrowser
 
         }
 
-        // Decrypt a file
+        // Decrypt a rsa file
         public static void Decrypt(string privateKeyFileName, string encryptedFileName, string plainFileName)
 
         {
@@ -304,16 +337,15 @@ namespace filebrowser
 
                 plainFile.Write(plainText);
 
+                //ToDo Logging
+
             }
 
             catch (Exception ex)
 
             {
-
+                //ToDo Logging
                 // Any errors? Show them
-
-                Console.WriteLine("Exception decrypting file! More info:");
-
                 Console.WriteLine(ex.Message);
 
             }
@@ -357,53 +389,32 @@ namespace filebrowser
 
     class crypto_symmetric
     {
+        //Method to encrypt files with symetric aes
         public void symetrEncrypt(string fileInputPath, string fileOutputPath, string fileOutputKeyPath, string fileOutputIVPath)
         {
             try
             {
-                /**
-                //Create FileStream to open and Save data
-                FileStream fsInputSymEncrypt = new FileStream(@fileInputPath, FileMode.Open);
-                FileStream fsOutputSymEncrypt = new FileStream(@fileOutputPath, FileMode.Create);
-
-                //Create a new instance of the RijndaelManaged class and encrypt the stream.  
-                RijndaelManaged RMCrypto = new RijndaelManaged();
-
-                //Generate RijndaelManaged Key & IV and save it in a string
-                RMCrypto.GenerateKey();
-                string Key = Convert.ToBase64String(RMCrypto.Key);
-                RMCrypto.GenerateIV();
-                string IV = Convert.ToBase64String(RMCrypto.IV);
-
-                //Create a CryptoStream, pass it the FileStream and encrypt it with the Rijndael class.  
-                CryptoStream CryptStream = new CryptoStream(fsOutputSymEncrypt, RMCrypto.CreateEncryptor(RMCrypto.Key, RMCrypto.IV), CryptoStreamMode.Write);
-
-                //Write Key to file
-                File.WriteAllText(fileOutputKeyPath,Key);
-                File.WriteAllText(fileOutputIVPath, IV);
-
-                //Close all the connections. 
-                CryptStream.Close();
-                fsInputSymEncrypt.Close();
-                fsOutputSymEncrypt.Close();
-                **/
-
                 using (RijndaelManaged RMCrypto = new RijndaelManaged())
                 {
+                    //ToDo crypt key & IV with rsa and save into a HashMap
                     RMCrypto.GenerateKey();
                     string Key = Convert.ToBase64String(RMCrypto.Key);
                     RMCrypto.GenerateIV();
                     string IV = Convert.ToBase64String(RMCrypto.IV);
 
+                    //Create file for Key & IV 
                     File.WriteAllText(fileOutputKeyPath, Key);
                     File.WriteAllText(fileOutputIVPath, IV);
 
+                    //Create file for new crypt document 
                     using (FileStream fsCrypt = new FileStream(fileOutputPath, FileMode.Create))
                     {
                         using (ICryptoTransform encryptor = RMCrypto.CreateEncryptor(RMCrypto.Key, RMCrypto.IV))
                         {
+                            //new CryptoStream to stream a file like a filestream but used for crypto data 
                             using (CryptoStream cs = new CryptoStream(fsCrypt, encryptor, CryptoStreamMode.Write))
                             {
+                                //Create FileStream to open and Save data in the while statment
                                 using (FileStream fsIn = new FileStream(fileInputPath, FileMode.Open))
                                 {
                                     int data;
@@ -417,30 +428,36 @@ namespace filebrowser
                     }
                 }
 
+                //ToDo Logging
             }
             catch
             {
+                //ToDO logging
                 //Inform the user that an exception was raised.  
-                Console.WriteLine("The encryption failed.");
             }
         }
 
+        //Method to decrypt files with a symetric aes
         public void symetrDecrypt(string fileInputPath, string fileOutputPath)
         {
-
             try
             {
                 using (RijndaelManaged aes = new RijndaelManaged())
                 {
+                    //Read aes keys
+                    //ToDo implement a Hashmap or Dictionary in C#
                     byte[] Key = Convert.FromBase64String(getKey(@"C:\crypto\aeskeys\Key.txt"));
                     byte[] IV = Convert.FromBase64String(getKey(@"C:\crypto\aeskeys\IV.txt"));
 
+                    //Read exist crypted file 
                     using (FileStream fsCrypt = new FileStream(fileInputPath, FileMode.Open))
                     {
+                        //New filestream to save the decrypted file as a new file
                         using (FileStream fsOut = new FileStream(fileOutputPath, FileMode.Create))
                         {
                             using (ICryptoTransform decryptor = aes.CreateDecryptor(Key, IV))
                             {
+                                //read encrypted file and save it in a new file withe the same name 
                                 using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read))
                                 {
                                     int data;
@@ -453,63 +470,37 @@ namespace filebrowser
                         }
                     }
                 }
+
+                //ToDo Logging
             }
+
             catch (Exception ex)
             {
+                //ToDo logging
                 // failed to decrypt file
             }
-            /**
-            byte[] Key = Convert.FromBase64String(getKey(@"C:\crypto\aeskeys\Key.txt"));
-            byte[] IV = Convert.FromBase64String(getKey(@"C:\crypto\aeskeys\IV.txt"));
-            try
-            {
-                //Create FileStream to open and Save data
-                FileStream fsInputSymEncrypt = new FileStream(@fileInputPath, FileMode.Open);
-                FileStream fsOutputSymEncrypt = new FileStream(@fileOutputPath, FileMode.Create);
-
-                //Create a new instance of the RijndaelManaged class  
-                // and decrypt the stream.  
-                RijndaelManaged RMCrypto = new RijndaelManaged();
-
-                //Create a CryptoStream, pass it the NetworkStream, and decrypt   
-                //it with the Rijndael class using the key and IV.  
-                CryptoStream CryptStream = new CryptoStream(fsOutputSymEncrypt, RMCrypto.CreateDecryptor(Key, IV), CryptoStreamMode.Read);
-
-                int data;
-                while ((data = CryptStream.ReadByte()) != -1)
-                {
-                    fsOutputSymEncrypt.WriteByte((byte)data);
-                }
-
-
-                //Close the streams. 
-                CryptStream.Close();
-                fsOutputSymEncrypt.Close();
-                fsInputSymEncrypt.Close();
-
-            }
-            //Catch any exceptions.   
-            catch
-            {
-                Console.WriteLine("The Listener Failed.");
-            }
-    **/
         }
 
+        //Get key from a file in a given path
         public string getKey(string fileInputKeyPath)
         {
             string Key = "";
             StreamReader srKey = new StreamReader(fileInputKeyPath);
             Key = srKey.ReadToEnd();
             return Key;
+
+            //ToDo Logging
         }
 
+        //Get IV from a file in a given path
         public string getIV(string fileInputIVPath)
         {
             string IV = "";
             StreamReader srIV = new StreamReader(fileInputIVPath);
             IV = srIV.ReadToEnd();
             return IV;
+
+            //ToDo Logging
         }
 
     }

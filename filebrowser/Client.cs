@@ -1,11 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/**
+ * 
+ * This is the main form where the user can encrypt and decrypt files.
+ * 
+ * Client() Initialize Form Component 
+ *
+ * PopulateTreeView() Initialize TreeView on the left side of the application
+ *
+ * GetDirectories() get all directorys from the main folder
+ * 
+ * but_treeView1_NodeMouseClick() allow to mark objects(folder, files) in the TreeView
+ *
+ * but_encrypt_Click() button who encrypte file and save them to the folder "encrypted" in the main folder.
+ *
+ * but_decrypt_Click() button who decrypt file and save them to the folder "decrypted" in the main folder.
+ *
+ **/
+
+using System;
 using System.Windows.Forms;
 using System.IO;
 
@@ -13,80 +24,110 @@ namespace filebrowser
 {
     public partial class Client : Form
     {
+        //define crypto elements and filesystem options
         crypto crypt = new crypto();
         crypto_symmetric symcrypt = new crypto_symmetric();
         directory checkAndCreateFolder = new directory();
 
+        //Generate the client form, check filesystem and build main componants 
         public Client()
         {
+            //check if folders exists if not create them 
             checkAndCreateFolder.checkfilesystem();
             InitializeComponent();
             PopulateTreeView();
         }
 
+        //create treeview for folder overview in main folder
         private void PopulateTreeView()
         {
-            TreeNode rootNode;
-
-            DirectoryInfo info = new DirectoryInfo(@"C:\crypto");
-            if (info.Exists)
+            try
             {
-                rootNode = new TreeNode(info.Name);
-                rootNode.Tag = info;
-                GetDirectories(info.GetDirectories(), rootNode);
-                treeView1.Nodes.Add(rootNode);
+                TreeNode rootNode;
+                DirectoryInfo info = new DirectoryInfo(@"C:\crypto");
+                if (info.Exists)
+                {
+                    rootNode = new TreeNode(info.Name);
+                    rootNode.Tag = info;
+                    GetDirectories(info.GetDirectories(), rootNode);
+                    treeView1.Nodes.Add(rootNode);
+                }
+                //ToDO Logging
+            }
+            catch
+            {
+                //ToDo Logging
             }
         }
 
+        //fill folder structer in treeview on the left side
         private void GetDirectories(DirectoryInfo[] subDirs, TreeNode nodeToAddTo)
         {
-            TreeNode aNode;
-            DirectoryInfo[] subSubDirs;
-            foreach (DirectoryInfo subDir in subDirs)
+            try
             {
-                aNode = new TreeNode(subDir.Name, 0, 0);
-                aNode.Tag = subDir;
-                aNode.ImageKey = "folder";
-                subSubDirs = subDir.GetDirectories();
-                if (subSubDirs.Length != 0)
+                TreeNode aNode;
+                DirectoryInfo[] subSubDirs;
+                foreach (DirectoryInfo subDir in subDirs)
                 {
-                    GetDirectories(subSubDirs, aNode);
+                    aNode = new TreeNode(subDir.Name, 0, 0);
+                    aNode.Tag = subDir;
+                    //Tag folder with a folder image, files with nothing
+                    aNode.ImageKey = "folder";
+                    subSubDirs = subDir.GetDirectories();
+                    if (subSubDirs.Length != 0)
+                    {
+                        GetDirectories(subSubDirs, aNode);
+                    }
+                    nodeToAddTo.Nodes.Add(aNode);
                 }
-                nodeToAddTo.Nodes.Add(aNode);
+                //ToDo Logging
+            }
+            catch
+            {
+                //ToDo Logging
             }
         }
 
         void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            TreeNode newSelected = e.Node;
-            listView1.Items.Clear();
-            DirectoryInfo nodeDirInfo = (DirectoryInfo)newSelected.Tag;
-            ListViewItem.ListViewSubItem[] subItems;
-            ListViewItem item = null;
-
-            foreach (DirectoryInfo dir in nodeDirInfo.GetDirectories())
+            try
             {
-                item = new ListViewItem(dir.Name, 0);
-                subItems = new ListViewItem.ListViewSubItem[]
-                          {new ListViewItem.ListViewSubItem(item, "Directory"),
+                TreeNode newSelected = e.Node;
+                listView1.Items.Clear();
+                DirectoryInfo nodeDirInfo = (DirectoryInfo)newSelected.Tag;
+                ListViewItem.ListViewSubItem[] subItems;
+                ListViewItem item = null;
+
+                foreach (DirectoryInfo dir in nodeDirInfo.GetDirectories())
+                {
+                    item = new ListViewItem(dir.Name, 0);
+                    subItems = new ListViewItem.ListViewSubItem[]
+                              {new ListViewItem.ListViewSubItem(item, "Directory"),
                    new ListViewItem.ListViewSubItem(item,
                 dir.LastAccessTime.ToShortDateString())};
-                item.SubItems.AddRange(subItems);
-                listView1.Items.Add(item);
-            }
-            foreach (FileInfo file in nodeDirInfo.GetFiles())
-            {
-                item = new ListViewItem(file.Name, 1);
-                subItems = new ListViewItem.ListViewSubItem[]
-                          { new ListViewItem.ListViewSubItem(item, "File"),
+                    item.SubItems.AddRange(subItems);
+                    listView1.Items.Add(item);
+                }
+                foreach (FileInfo file in nodeDirInfo.GetFiles())
+                {
+                    item = new ListViewItem(file.Name, 1);
+                    subItems = new ListViewItem.ListViewSubItem[]
+                              { new ListViewItem.ListViewSubItem(item, "File"),
                    new ListViewItem.ListViewSubItem(item,
                 file.LastAccessTime.ToShortDateString())};
 
-                item.SubItems.AddRange(subItems);
-                listView1.Items.Add(item);
-            }
+                    item.SubItems.AddRange(subItems);
+                    listView1.Items.Add(item);
+                }
 
-            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+
+                //ToDo Logging
+            }
+            catch
+            {
+                //ToDo Logging
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -94,16 +135,38 @@ namespace filebrowser
             this.treeView1.NodeMouseClick += new TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
         }
 
+        //encrypt files
         private void but_encrypt_Click(object sender, EventArgs e)
         {
-            symcrypt.symetrEncrypt(@"C:\crypto\decrypted\bild.jpg", @"C:\crypto\encrypted\bild.jpg", @"C:\crypto\aeskeys\Key.txt", @"C:\crypto\aeskeys\IV.txt");
-            MessageBox.Show("Encrypt File", "Success");
+            try
+            {
+                //ToDo connect marked listview elements to the encryption method
+                symcrypt.symetrEncrypt(@"C:\crypto\decrypted\bild.jpg", @"C:\crypto\encrypted\bild.jpg", @"C:\crypto\aeskeys\Key.txt", @"C:\crypto\aeskeys\IV.txt");
+                MessageBox.Show("Encrypt File", "Success");
+
+                //ToDo Logging
+            }
+            catch
+            {
+                //ToDo Logging
+            }
         }
 
+        //encrypt files
         private void but_decrypt_Click(object sender, EventArgs e)
         {
-            symcrypt.symetrDecrypt(@"C:\crypto\encrypted\bild.jpg", @"C:\crypto\decrypted\bild.jpg");
-            MessageBox.Show("Decrypt File", "Success");
+            try
+            {
+                //ToDo use maked files to decrypt 
+                symcrypt.symetrDecrypt(@"C:\crypto\encrypted\bild.jpg", @"C:\crypto\decrypted\bild.jpg");
+                MessageBox.Show("Decrypt File", "Success");
+
+                //ToDo Logging
+            }
+            catch
+            {
+                //ToDo Logging
+            }
         }
     }
 }
