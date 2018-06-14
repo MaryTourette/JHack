@@ -140,10 +140,20 @@ namespace filebrowser
         {
             try
             {
-                //ToDo connect marked listview elements to the encryption method
-                symcrypt.symetrEncrypt(@"C:\crypto\decrypted\bild.jpg", @"C:\crypto\encrypted\bild.jpg", @"C:\crypto\aeskeys\Key.txt", @"C:\crypto\aeskeys\IV.txt");
-                MessageBox.Show("Encrypt File", "Success");
-
+                if (listView1.SelectedIndices.Count != 0)
+                {
+                    //ToDo save key und iv in hashmap
+                    foreach (ListViewItem item in listView1.SelectedItems)
+                    {
+                        symcrypt.symetrEncrypt(@"C:\crypto\decrypted\" + item.Text, @"C:\crypto\encrypted\" + item.Text, @"C:\crypto\aeskeys\Key.txt", @"C:\crypto\aeskeys\IV.txt");
+                        File.Delete(@"C:\crypto\decrypted\" + item.Text);
+                    }
+                    MessageBox.Show("Encrypt File", "Success");
+                }
+                else
+                {
+                    MessageBox.Show("No file selected", "error");
+                }
                 //ToDo Logging
             }
             catch
@@ -157,9 +167,21 @@ namespace filebrowser
         {
             try
             {
-                //ToDo use maked files to decrypt 
-                symcrypt.symetrDecrypt(@"C:\crypto\encrypted\bild.jpg", @"C:\crypto\decrypted\bild.jpg");
+                if (listView1.SelectedIndices.Count != 0)
+                {
+                    //ToDo use maked files to decrypt 
+
+                    foreach (ListViewItem item in listView1.SelectedItems)
+                {
+                    symcrypt.symetrDecrypt(@"C:\crypto\encrypted\" + item.Text, @"C:\crypto\decrypted\" + item.Text);
+                    File.Delete(@"C:\crypto\encrypted\" + item.Text);
+                }
                 MessageBox.Show("Decrypt File", "Success");
+                }
+                else
+                {
+                    MessageBox.Show("No file selected", "error");
+                }
 
                 //ToDo Logging
             }

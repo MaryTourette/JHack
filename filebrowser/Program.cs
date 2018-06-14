@@ -14,8 +14,8 @@ namespace filebrowser
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 #if DEBUG
-            //Application.Run(new Form1());
-            Application.Run(new Login());
+            Application.Run(new Client());
+            //Application.Run(new Login());
 #else
             Application.Run(new Login());
 #endif
