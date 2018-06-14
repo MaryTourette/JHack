@@ -78,7 +78,7 @@ namespace filebrowser
         //Get user details from WebAPI including jwt
         public User GetUserDetails(User user)
         {
-            string endpoint = this.baseUrl + "/users/" + user.Id;
+            string endpoint = this.baseUrl + "/users/" + user.eMail;
             string access_token = user.access_token;
 
             WebClient wc = new WebClient();
